@@ -2,6 +2,7 @@ package net.st_jacques.todolist
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,30 +28,24 @@ class MainActivity : AppCompatActivity() {
         buttonSubmitTask = findViewById(R.id.buttonSubmitTask)
         taskListView = findViewById(R.id.listViewTasks)
 
-//        Testing array
-//        taskList = arrayListOf(
-//            Task("Hello", false),
-//            Task("Cruel", false),
-//            Task("World", false)
-//        )
-
         // Initialise customer taskList adapter
-        val taskListAdapter = object: ArrayAdapter<Task>(this,R.layout.task_item, taskList) {
-            // Overridden getView
+        val taskListAdapter = object : ArrayAdapter<Task>(this, R.layout.task_item, taskList) {
+            // Overridden getView fun
             override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-                val view = convertView ?: LayoutInflater.from(context).inflate(R.layout.task_item, parent, false)
+                // Sets view to the initialized task_item layout
+                val view = convertView ?: LayoutInflater.from(context)
+                    .inflate(R.layout.task_item, parent, false)
                 val task = getItem(position)
                 val checkedTextView = view.findViewById<CheckedTextView>(R.id.checkedTextView)
-                val textViewTaskDescription = view.findViewById<TextView>(R.id.textViewTaskDescription)
-                // Set the taskDescriptionTextView text to task description
+                // Gets the textViewTaskDescription from the current task_item layout
+                val textViewTaskDescription =
+                    view.findViewById<TextView>(R.id.textViewTaskDescription)
                 textViewTaskDescription.text = task?.description
                 // Set the checkedTextView check state to the state of the task, if it is null, set it to false.
                 checkedTextView.isChecked = task?.isComplete ?: false
                 // Sets the onClickListener of the checkedTextView
                 checkedTextView.setOnClickListener {
-                    // Toggle the Task object boolean
                     task?.isComplete = !checkedTextView.isChecked
-                    // Sets the checkTextView checkmark to the state of the task object
                     checkedTextView.isChecked = task?.isComplete ?: false
                 }
                 return view
@@ -59,12 +54,35 @@ class MainActivity : AppCompatActivity() {
         // Sets the taskListView adapter
         taskListView.adapter = taskListAdapter
 
-        buttonSubmitTask.setOnClickListener{
-            val newTask = Task(editTextNewTask.text.toString(), false)
-            editTextNewTask.setText("")
-            taskList.add(newTask)
-            taskListAdapter.notifyDataSetChanged()
+        // Function to submit task to the list
+        fun submitTask() {
+            if (!editTextNewTask.text.toString().isNullOrBlank()) {
+                // Create a new task with the editTextNewTask string, unchecked by default
+                val newTask = Task(editTextNewTask.text.toString(), false)
+                // Add the new task to the list
+                taskList.add(newTask)
+                // Clear the editText
+                editTextNewTask.setText("")
+                // Inform the adapter the data has been changed.
+                taskListAdapter.notifyDataSetChanged()
+            }
         }
+
+        // Sets the submit button onClickListener to the submit button
+        buttonSubmitTask.setOnClickListener { submitTask() }
+
+        // Sets the editText onKeyListener to listen for ENTER keystrokes, and submit the task
+        editTextNewTask.setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
+            // If the pressed key is ENTER and the key is being released, submit the task
+            if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
+                submitTask()
+                // The true/false returns the event to the OnKeyListener and tells it if it
+                // has handled the event, if true the event was handled, and it is ignored
+                // if false, the event was not handled and allow the next listener to handle it.
+                return@OnKeyListener true
+            }
+            return@OnKeyListener false
+        })
     }
 }
 

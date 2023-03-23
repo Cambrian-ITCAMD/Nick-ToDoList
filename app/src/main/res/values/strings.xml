@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ToDoList</string>
+    <string name="app_name">Nick\'s Amazing ToDo List!</string>
     <string name="enterTask">Enter task here</string>
     <string name="submit">Submit</string>
     <string name="task_description">Task description</string>
